@@ -83,8 +83,30 @@ const login = async (req, res) => {
   });
 };
 
+const getOne = async (req, res)=>{
+
+  const {id} = req.params;
+  
+  const user = users.find(
+    (u) => u.id === Number(id)
+  );
+
+  if (!user) {
+    return res.status(404).json({
+      status: "error",
+      message: "User not found"
+    });
+  }
+
+  return res.status(200).json({
+    status: "success",
+    data: user
+  });
+
+}
 
 module.exports = {
   finalRegister,
-  login
+  login,
+  getOne
 };
