@@ -3,6 +3,29 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const users = require("../database");
 
+const searchUser = async (req, res) => {
+  const { query } = req.query;
+
+  const matchedUsers = users.filter(
+    (u) =>
+      u.name.toLowerCase().includes(query.toLowerCase()) ||
+      u.email.toLowerCase().includes(query.toLowerCase()) || u.phone.includes(query)
+  );
+
+  if (matchedUsers.length === 0) {
+    return res.status(404).json({
+      status: "error",
+      message: "No users found matching the query"
+    });
+  }
+
+  return res.status(200).json({
+    status: "success",
+    data: matchedUsers
+  });
+
+}
+
 const finalRegister = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(req.body.password, process.env.SALT_ROUNDS);
@@ -27,7 +50,6 @@ const finalRegister = async (req, res) => {
     message: "User registered successfully"
   });
 };
-
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -105,8 +127,11 @@ const getOne = async (req, res)=>{
 
 }
 
+
+
 module.exports = {
   finalRegister,
   login,
-  getOne
+  getOne,
+  searchUser
 };

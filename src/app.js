@@ -24,7 +24,7 @@ app.use(logger);
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 10
+  limit: process.env.LIMIT
 });
 
 // Routes
@@ -34,7 +34,7 @@ app.get("/", logger, (req, res) => {
     "message": "Welcome, API is running"
   });
 });
-app.use("/user", apiLimiter, userRoutes);
+
 app.use("/role", apiLimiter, roleRoutes);
 app.use("/file", apiLimiter, uploadRoutes);
 app.use("/user", logger, apiLimiter, userRoutes);

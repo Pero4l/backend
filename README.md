@@ -5,11 +5,16 @@ Error handling -- done
 Logger -- done
 Validation -- done 
 Rate limiting -- done
-CORS -- done  
+CORS -- done
+
+
 API documentation (Swagger/OpenAPI) --
 Security best practices --- 
-File uploads --
+File uploads -- 
 
 
-  <!-- const identifier = email ? { email } : { phone };
-  const user = await User.scope('withPassword').findOne({ where: identifier }); -->
+  req.query
+
+  req.body
+  re.header
+  req.params
