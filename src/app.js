@@ -1,8 +1,11 @@
 const express = require("express");
+require("dotenv").config();
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("../swagger.json");
 
 const app = express();
 
@@ -21,10 +24,11 @@ app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(logger);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: process.env.LIMIT
+  limit: 20
 });
 
 // Routes

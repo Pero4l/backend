@@ -1,0 +1,395 @@
+{
+  "info": {
+    "_postman_id": "8a5e5a1f-6f6b-4d6f-9c8f-7b6a5d4c3e21",
+    "name": "Backend API",
+    "description": "Postman collection for the current Express API. Set baseUrl to the reachable API origin, run Register User and Login User to populate accessToken, then run the protected requests. Upload File requires uploadFilePath to point to a local file.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('baseUrl')) {",
+          "  pm.collectionVariables.set('baseUrl', 'http://localhost:5700');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5700",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "registerName",
+      "value": "Avery4",
+      "type": "string"
+    },
+    {
+      "key": "registerEmail",
+      "value": "newuser@example.com",
+      "type": "string"
+    },
+    {
+      "key": "registerPhone",
+      "value": "01234567890",
+      "type": "string"
+    },
+    {
+      "key": "registerPassword",
+      "value": "ExamplePass1!",
+      "type": "string"
+    },
+    {
+      "key": "loginEmail",
+      "value": "newuser@example.com",
+      "type": "string"
+    },
+    {
+      "key": "loginPassword",
+      "value": "ExamplePass1!",
+      "type": "string"
+    },
+    {
+      "key": "userQuery",
+      "value": "Avery",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "uploadFilePath",
+      "value": "/absolute/path/to/example.png",
+      "type": "string"
+    },
+    {
+      "key": "uploadedFilename",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Checks whether the service is running."
+          },
+          "response": []
+        },
+        {
+          "name": "Download Uploaded File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/uploads/{{uploadedFilename}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "uploads",
+                "{{uploadedFilename}}"
+              ]
+            },
+            "description": "Set uploadedFilename to the filename returned by a successful upload."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{registerName}}\",\n  \"email\": \"{{registerEmail}}\",\n  \"phone\": \"{{registerPhone}}\",\n  \"password\": \"{{registerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "register"
+              ]
+            },
+            "description": "Creates a user in the in-memory store. The current API returns HTTP 200 on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.token) {",
+                  "  pm.collectionVariables.set('accessToken', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{loginEmail}}\",\n  \"password\": \"{{loginPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "login"
+              ]
+            },
+            "description": "Returns a one-hour JWT and stores it in the accessToken collection variable for later requests."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Search Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/?query={{userQuery}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "{{userQuery}}",
+                  "description": "Searches name, email, and phone."
+                }
+              ]
+            },
+            "description": "Searches for users. Any valid JWT is accepted; the endpoint is not role-restricted."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{userId}}"
+              ]
+            },
+            "description": "Returns one user by ID. The current response may include a password field."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Admin Role",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/role/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "role",
+                "admin"
+              ]
+            },
+            "description": "Requires a JWT with role=admin."
+          },
+          "response": []
+        },
+        {
+          "name": "User Role",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/role/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "role",
+                "user"
+              ]
+            },
+            "description": "Requires any valid JWT."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Upload File",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.file && response.file.filename) {",
+                  "  pm.collectionVariables.set('uploadedFilename', response.file.filename);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{uploadFilePath}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/file/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "file",
+                "upload"
+              ]
+            },
+            "description": "Uploads one file in the file field. The server accepts JPEG, PNG, GIF, WEBP, PDF, and plain text files up to 5 MB."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

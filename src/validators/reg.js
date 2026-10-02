@@ -68,9 +68,8 @@
 const { z } = require("zod");
 
 const registerSchema = z.object({
-  name: z.string().trim().min(4, "Name must be at least 4 characters and include a number").regex(/(?=.*[0-9])/, "Name must include a number"),
+  name: z.string().trim().min(4, "Name must be at least 4 characters and include a number"),
   email: z.string().trim().email(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "invalid email"),
-  phone: z.string().trim().length(11, "Phone number must be 11 digits"),
   password: z.string().trim().min(6, "Password must be at least 6 characters")
 });
 

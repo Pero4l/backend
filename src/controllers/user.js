@@ -1,7 +1,9 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const {Users} = require("../../models")
 const jwt = require("jsonwebtoken");
-const users = require("../database");
+const { where } = require("sequelize");
+const { email } = require("zod");
 
 const searchUser = async (req, res) => {
   const { query } = req.query;
@@ -28,18 +30,28 @@ const searchUser = async (req, res) => {
 
 const finalRegister = async (req, res) => {
 
-  const hashPassword = await bcrypt.hash(req.body.password, process.env.SALT_ROUNDS);
+  const email = req.body.email
+
+
+  const user = await Users.findOne({where: {email}})
+  
+  if(user.email === email){
+
+    res.status(409).json({
+      "success": "false",
+      "message": "User already Exist"
+    })
+  }
+
+  const hashPassword = await bcrypt.hash(req.body.password, 12);
 
   const newUser = {
-    id: users.length + 1,
     email: req.body.email,
     name: req.body.name,
-    phone: req.body.phone,
     password: hashPassword,
-    role: "user"
   };
 
-  users.push(newUser);
+  await Users.create(newUser)
 
   console.log(
     `User ${newUser.name} your account was registered successfully`
@@ -54,9 +66,7 @@ const finalRegister = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = users.find(
-    (u) => u.email === String(email).trim()
-  );
+  const user = await Users.findOne({where: {email}})
 
   if (!user) {
     return res.status(401).json({
@@ -64,18 +74,16 @@ const login = async (req, res) => {
       message: "Invalid email or password"
     });
   }
+  const passwordCheck = password.trim();
 
-  // const passwordMatch = await bcrypt.compare(
-  //   String(password).trim(),
-  //   user.password
-  // );
+  const passwordMatch = await bcrypt.compare(passwordCheck,user.password);
 
-  // if (!passwordMatch) {
-  //   return res.status(401).json({
-  //     status: "error",
-  //     message: "Invalid email or password"
-  //   });
-  // }
+  if (!passwordMatch) {
+    return res.status(401).json({
+      status: "error",
+      message: "Invalid email or password"
+    });
+  }
 
   if (!process.env.JWT_SECRET) {
     return res.status(500).json({
@@ -100,7 +108,6 @@ const login = async (req, res) => {
   return res.status(200).json({
     status: "success",
     message: "Login successful",
-    role: user.role,
     token
   });
 };
